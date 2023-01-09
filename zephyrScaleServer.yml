@@ -1,0 +1,964 @@
+openapi: 3.0.3
+info:
+  title: Zephyr Scale Server API
+  description: Conversion based in Zephyr Scale Server API [v1](https://support.smartbear.com/zephyr-scale-server/api-docs/v1/)
+  version: 1.0.0
+  contact: { }
+servers:
+  - url: 'https://yourdomain/jiracontext//rest/atm/1.0'
+paths:
+  /testcase:
+    post:
+      tags:
+        - testcases
+      summary: Creates a new Test Case
+      operationId: createTestCase
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+      responses:
+        '201':
+          description: 'The Test Case was successfully created.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                required:
+                  - key
+        '400':
+          description: 'Some parameters are invalid or not found.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errorMessages:
+                    type: array
+                    items:
+                      type: string
+                    required:
+                      - type
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: object
+                    properties:
+                      statusCode:
+                        type: integer
+                      message:
+                        type: string
+
+  /testcase/{testCaseKey}:
+    delete:
+      tags:
+        - testcases/{testCaseKey}
+      summary: Delete the Test Case matching the given key.
+      description: Delete the Test Case matching the given key.
+      operationId: deleteTestCase
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'The Test Case was successfully deleted.'
+        '404':
+          description: 'No Test Case has been found with the given key.'
+    put:
+      tags:
+        - testcases/{testCaseKey}
+      summary: Update Test Case
+      description: Update Test Case
+      operationId: updateTestCase
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      requestBody:
+        description: 'The test case Object'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestCase'
+
+      responses:
+        '200':
+          description: 'The Test Case was successfully updated.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+    get:
+      tags:
+        - testcases/{testCaseKey}
+      summary: Get Test Case
+      description: Retrieve the Test Case matching the given key.
+      operationId: getTestCase
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Case was successfully retrieved.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/definitions/TestCaseData'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key.'
+
+  /testcase/{testCaseKey}/attachments:
+    post:
+      tags:
+        - testcases/attachments
+      description: 'Create a new attachment on the specified Test Case.'
+      operationId: addAttachment
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 'The attachment was successfully created.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key.'
+    get:
+      tags:
+        - testcases/attachments
+      description: 'Retrieve the Test Case Attachments matching the given key.'
+      operationId: getAttachment
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Case Attachments were successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key.'
+
+  /testcase/{testCaseKey}/testresult/latest:
+    get:
+      tags:
+        - testcases
+      summary: Retrieve the last test result for a given key
+      description: 'Retrieve the last test result for a given key'
+      operationId: getLastTestResult
+      parameters:
+        - name: 'testCaseKey'
+          required: true
+          in: path
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Last Test Result was successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key or the Test Case has no results.'
+
+  /testcase/{testCaseKey}/step/{stepIndex}/attachments:
+    post:
+      tags:
+        - testcases
+      description: 'Create a new attachment on the specified Step of a Test Case.'
+      operationId: createAttachment
+      parameters:
+        - name: 'testCaseKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'stepIndex'
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '201':
+          description: 'The attachment was successfully created.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key or the Step Index was not found.'
+    get:
+      tags:
+        - testcases
+      description: 'Retrieve the attachments for a test case step'
+      operationId: getAttachmentFromTestCaseKey
+      parameters:
+        - name: 'testCaseKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'stepIndex'
+          required: true
+          in: path
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'The test case step attachment was successfully retrieved.'
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                [
+                  {
+                    "id": 21,
+                    "url": "http://yourdomain/jiracontext/rest/tests/1.0/attachment/21",
+                    "filename": "Filename.pdf",
+                    "filesize": 2096
+                  },
+                  {
+                    "id": 22,
+                    "url": "http://yourdomain/jiracontext/rest/tests/1.0/attachment/22",
+                    "filename": "Image.jpg",
+                    "filesize": 2120
+                  }
+                ]
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Case has been found with the given key or the Step Index was not found.'
+
+  /testcase/search:
+    get:
+      tags:
+        - testcases
+      description: 'Find Test Case'
+      operationId: findTestCase
+      parameters:
+        - name: 'fields'
+          example:
+            key,name,folder,status,priority,component,owner,estimatedTime,labels,customFields,issueLinks
+          in: query
+          schema:
+            type: string
+        - name: 'maxResults'
+          in: query
+          example:
+            100
+          schema:
+            type: integer
+        - name: 'query'
+          in: query
+          example:
+            projectKey = "JQA" AND status = "Draft" AND priority = "High"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Cases were successfully retrieved.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TestCaseList'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+  /testplan:
+    post:
+      tags:
+        - testplan
+      operationId: createTestPlan
+      summary: Creates a new Test Plan.
+      responses:
+        '201':
+          description: 'The Test Plan was successfully created.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+  /testplan/{testPlanKey}:
+    delete:
+      tags:
+        - testplan/{testPlanKey}
+      summary: Delete the Test Plan matching the given key.
+      operationId: deleteTestPlan
+      parameters:
+        - name: 'testPlanKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'The Test Plan was successfully deleted.'
+        '404':
+          description: 'No Test Plan has been found with the given key.'
+    put:
+      tags:
+        - testplan/{testPlanKey}
+      operationId: updateTestPlan
+      parameters:
+        - name: 'testPlanKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Plan was successfully updated.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+    get:
+      tags:
+        - testplan/{testPlanKey}
+      operationId: getTestPlan
+      parameters:
+        - name: 'testPlanKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Plan was successfully retrieved.'
+        '400':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '401':
+          description: 'No Test Plan has been found with the given key.'
+  /testplan/{testPlanKey}/attachments:
+    post:
+      tags:
+        - testplan/{testPlanKey}/attachments
+      operationId: createTestPlanAttachment
+      summary: Create a new attachment on the specified Test Plan.
+      parameters:
+        - name: 'testPlanKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 'The attachment was successfully created.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Plan has been found with the given key.'
+    get:
+      tags:
+        - testplan/{testPlanKey}/attachments
+      operationId: getTestPlanAttachments
+      summary: Retrieve the Test Plan Attachments matching the given key.
+      parameters:
+        - name: 'testPlanKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Plan Attachments were successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Plan has been found with the given key.'
+
+  /testplan/search:
+    get:
+      tags:
+        - testplan/search
+      operationId: findTestPlan
+      parameters:
+        - name: 'fields'
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'maxResults'
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: 'query'
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'startAt'
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'The Test Plans were successfully retrieved.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+  /testrun:
+    post:
+      tags:
+        - testrun
+      operationId: createTestRun
+      summary: Creates a new Test Run.
+      responses:
+        '201':
+          description: 'The Test Run was successfully created.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+  /testrun/{testRunKey}:
+    delete:
+      tags:
+        - testrun/{testRunKey}
+      operationId: deleteTestRun
+      summary: Delete the Test Run matching the given key.
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: 'The Test Run was successfully deleted.'
+        '404':
+          description: 'No Test Run has been found with the given key.'
+    get:
+      tags:
+        - testrun/{testRunKey}
+      operationId: getTestRun
+      summary: Retrieve Test Run
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Run was successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Run has been found with the given key.'
+
+  /testrun/{testRunKey}/attachments:
+    post:
+      summary: Create a new attachment on the specified Test Run.
+      operationId: createAttachments
+      tags:
+        - testrun/{testRunKey}/attachments
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: 'The attachment was successfully created.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Run has been found with the given key.'
+    get:
+      operationId: getTestRunAttachments
+      summary: Retrieve the Test Run Attachments matching the given key.
+      tags:
+        - testrun/{testRunKey}/attachments
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'The Test Run Attachments were successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+        '404':
+          description: 'No Test Run has been found with the given key.'
+
+  /testrun/{testRunKey}/testcase/{testCaseKey}/testresult:
+    put:
+      operationId: updateTestRun
+      tags:
+        - testrun/{testRunKey}/testcase/{testCaseKey}/testresult
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'testCaseKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'environment'
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'userKey'
+          in: query
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+      responses:
+        '200':
+          description: 'The last Test Result was successfully updated.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+    post:
+      operationId: createTestResult
+      tags:
+        - testrun/{testRunKey}/testcase/{testCaseKey}/testresult
+      parameters:
+        - name: 'testRunKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'testCaseKey'
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: 'environment'
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: 'userKey'
+          in: query
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+      responses:
+        '201':
+          description: 'The Test Result was successfully created.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the JIRA REST API docs for details.'
+
+  /testrun/{testRunKey}/testresults:
+    post:
+      operationId: createTestRunResult
+      parameters:
+        - name: testRunKey
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: environment
+          in: query
+          schema:
+            type: string
+        - name: userKey
+          in: query
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TestResult'
+      responses:
+        '201':
+          description: 'The Test Result was successfully created.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the [JIRA REST API](https://docs.atlassian.com/jira/REST/latest) docs for details'
+
+    get:
+      operationId: getTestRunResult
+      parameters:
+        - name: testRunKey
+          in: path
+          required: true
+          schema:
+            type: string
+            properties:
+              testRunKey:
+                type: string
+            required:
+              - testRunKey
+      responses:
+        '200':
+          description: 'The Test Result list was successfully retrieved.'
+        '401':
+          description: 'Authentication error. See the [JIRA REST API](https://docs.atlassian.com/jira/REST/latest) docs for details'
+        '404':
+          description: 'No Test Run has been found with the given key.'
+
+  /testrun/search:
+    get:
+      operationId: findTestRun
+      parameters:
+        - name: fields
+          in: query
+          schema:
+            type: string
+        - name: maxResults
+          in: query
+          schema:
+            type: integer
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: startAt
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 'The Test Runs were successfully retrieved.'
+        '400':
+          description: 'Some parameters are invalid or not found.'
+        '401':
+          description: 'Authentication error. See the [JIRA REST API](https://docs.atlassian.com/jira/REST/latest) docs for details'
+
+
+components:
+  schemas:
+
+    TestCaseStep:
+      type: object
+      properties:
+        expectedResult:
+          type: string
+        index:
+          type: integer
+        description:
+          type: string
+        id:
+          type: integer
+      required:
+        - expectedResult
+        - index
+        - description
+        - id
+
+    TestCase:
+      type: object
+      properties:
+        owner:
+          type: string
+        updatedBy:
+          type: string
+        updatedOn:
+          type: string
+        precondition:
+          type: string
+        priority:
+          type: string
+        majorVersion:
+          type: integer
+        createdOn:
+          type: string
+        objective:
+          type: string
+        projectKey:
+          type: string
+        folder:
+          type: string
+        latestVersion:
+          type: boolean
+        createdBy:
+          type: string
+        testScript:
+          type: object
+          properties:
+            id:
+              type: integer
+            type:
+              type: string
+            steps:
+              type: array
+              items:
+                $ref: '#/components/schemas/TestCaseStep'
+          required:
+            - id
+            - type
+            - steps
+        name:
+          type: string
+        parameters:
+          type: object
+          properties:
+            variables:
+              type: array
+              items: { }
+            entries:
+              type: array
+              items: { }
+          required:
+            - variables
+            - entries
+        key:
+          type: string
+        status:
+          type: string
+      required:
+        - owner
+        - updatedBy
+        - updatedOn
+        - precondition
+        - priority
+        - majorVersion
+        - createdOn
+        - objective
+        - projectKey
+        - folder
+        - latestVersion
+        - createdBy
+        - testScript
+        - name
+        - parameters
+        - key
+        - status
+
+    TestCaseList:
+      type: array
+      items:
+        $ref: '#/components/schemas/TestCase'
+
+    TestCaseData:
+      type: object
+      properties:
+        owner:
+          type: string
+        updatedBy:
+          type: string
+        updatedOn:
+          type: string
+        precondition:
+          type: string
+        priority:
+          type: string
+        majorVersion:
+          type: integer
+        createdOn:
+          type: string
+        objective:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        projectKey:
+          type: string
+        folder:
+          type: string
+        latestVersion:
+          type: boolean
+        createdBy:
+          type: string
+        testScript:
+          type: object
+          properties:
+            id:
+              type: integer
+            type:
+              type: string
+            steps:
+              type: array
+              items:
+                $ref: '#/components/schemas/TestCaseStep'
+          required:
+            - id
+            - type
+            - steps
+        name:
+          type: string
+        lastTestResultStatus:
+          type: string
+        parameters:
+          type: object
+          properties:
+            variables:
+              type: array
+              items: { }
+            entries:
+              type: array
+              items: { }
+          required:
+            - variables
+            - entries
+        key:
+          type: string
+        status:
+          type: string
+      required:
+        - owner
+        - updatedBy
+        - updatedOn
+        - precondition
+        - priority
+        - majorVersion
+        - createdOn
+        - objective
+        - labels
+        - projectKey
+        - folder
+        - latestVersion
+        - createdBy
+        - testScript
+        - name
+        - lastTestResultStatus
+        - parameters
+        - key
+        - status
+
+    ScriptResult:
+      {
+        "type": "object",
+        "properties": {
+          "testData": {
+            "type": "string"
+          },
+          "expectedResult": {
+            "type": "string"
+          },
+          "executionDate": {
+            "type": "string"
+          },
+          "index": {
+            "type": "integer"
+          },
+          "description": {
+            "type": "string"
+          },
+          "comment": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "testData",
+          "expectedResult",
+          "executionDate",
+          "index",
+          "description",
+          "comment",
+          "status"
+        ]
+      }
+    TestResult:
+      type: object
+      properties:
+        executedBy:
+          type: string
+        actualEndDate:
+          type: string
+        executionDate:
+          type: string
+        scriptResults:
+          type: array
+          items:
+            $ref: '#/components/schemas/TestResult'
+        assignedTo:
+          type: string
+        userKey:
+          type: string
+        executionTime:
+          type: integer
+        testCaseKey:
+          type: string
+        environment:
+          type: string
+        automated:
+          type: boolean
+        actualStartDate:
+          type: string
+        comment:
+          type: string
+        id:
+          type: integer
+        projectId:
+          type: integer
+        key:
+          type: string
+        status:
+          type: string
+      required:
+        - executedBy
+        - actualEndDate
+        - executionDate
+        - scriptResults
+        - assignedTo
+        - userKey
+        - executionTime
+        - testCaseKey
+        - environment
+        - automated
+        - actualStartDate
+        - comment
+        - id
+        - projectId
+        - key
+        - status
+
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+security:
+  - basicAuth: [ ]
